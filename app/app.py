@@ -59,7 +59,7 @@ if st.button("Generate Plan"):
 
     # Convert back to percentages
     plan_rates = {col: (val / income) * 100 for col, val in plan_amounts.items()}
-
+    plan_amounts = {col: round(val, -3) for col, val in plan_amounts.items()}
     # Display
     st.subheader("📊 Recommended Budget Plan")
     st.write("**Percentages (%)**")

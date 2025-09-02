@@ -91,23 +91,6 @@ def enforce_budget_constraints(df: pd.DataFrame):
 # -------------------------------
 # 5. Recommendation API
 # -------------------------------
-# def recommend(model, X_row: pd.Series, budget_cols_rate, known_rates: dict):
-#     pred = pd.Series(model.predict(X_row.to_frame().T)[0], index=budget_cols_rate)
-#     pred = pred.clip(lower=0)
-
-#     remaining = 100 - sum(known_rates.values())
-#     remaining = max(remaining, 0)
-
-#     unknown = [c for c in budget_cols_rate if c not in known_rates]
-#     scaled_unknown = pred[unknown]
-#     s = scaled_unknown.sum()
-#     if s <= 0: scaled_unknown[:] = remaining / len(unknown)
-#     else: scaled_unknown = scaled_unknown * (remaining / s)
-
-#     final = pd.Series(0.0, index=budget_cols_rate)
-#     for k,v in known_rates.items(): final[k] = v
-#     final[unknown] = scaled_unknown
-#     return final.round(2)
 def recommend(model, X_row, budget_cols_rate, known_rates):
     """
     X_row: dict with user inputs (numbers in VND)
@@ -129,28 +112,12 @@ def recommend(model, X_row, budget_cols_rate, known_rates):
     ratios.update(known_rates)
 
     # Step 3: Prepare DataFrame with all required features
-    # X_row_df = pd.DataFrame([{col: ratios.get(col, 0) for col in budget_cols_rate}])
-    # X_row_df = pd.DataFrame([X_row])
     X_row_df = pd.DataFrame([{**X_row,**{col: ratios.get(col, 0) for col in budget_cols_rate}}])
 
-    print("Input of pipeline: \n", X_row_df.columns.tolist()) #debug
+    # print("Input of pipeline: \n", X_row_df.columns.tolist()) #debug
     # Step 4: Predict missing ratios
     pred = pd.Series(model.predict(X_row_df)[0], index=budget_cols_rate)
-    print("Prediction: ", pred)
-    # Step 5: Merge predictions with known ratios
-    # plan_rates = pred.to_dict()
-    # plan_rates = pd.Series(pred, index=budget_cols_rate)
-
-    # plan_rates.update(ratios)
-    
-    # # Step 6: Convert back to absolute amounts
-    # plan_amounts = {col.replace("_Ratio", ""): rate * total_income for col, rate in plan_rates.items()}
-
-    # # Step 7: Auto-calc Other_spending
-    # if "Other_spending" in plan_amounts:
-    #     spent_without_other = sum(v for k, v in plan_amounts.items() if k != "Other_spending")
-    #     plan_amounts["Other_spending"] = total_income - spent_without_other
-    #     plan_rates["Other_spending_Ratio"] = plan_amounts["Other_spending"] / total_income
+    # print("Prediction: ", pred)
     return pred
 df = pd.read_csv("synthetic_financial_behavior_dataset_balanced_rounded.csv")
 
